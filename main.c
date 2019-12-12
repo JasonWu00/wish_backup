@@ -56,8 +56,6 @@ int main() {
     for(int q = 0; q < numCommands; q++) {//for every command entered
 
 	  char * pointer = commandArray[q];
-      char backup[100];
-      strcpy(backup, commandArray);
       struct parse_output outstruct;
       outstruct = parse_args(input);
       outstruct.lastToken--;
@@ -122,30 +120,34 @@ int main() {
           printf("stdout replaced\n");
         }
 
-        /*char null = "\0";
+        //const char null = "\0";
+        /*char *p = outstruct.output;
         for (int counter = 0; counter < outstruct.lastToken; counter++) {
+          p += sizeof (char *);
           if (strcmp(outstruct.output[counter], ">") == 0) {
             printf("replaced > with NULL\n");
-            char *p = &outstruct.output[pointer];
-            strcpy(outstruct.output[counter], &null);
+            *p = "\0";
           }
           if (strcmp(outstruct.output[counter], "<") == 0) {
             printf("replaced < with NULL\n");
-            strcpy(outstruct.output[counter], &null);
+            *p = "\0";
           }
         }*/
 
-          /*char *less_pointer = strchr(outstruct.output[less_num], "<");
-          char *more_pointer = strchr(outstruct.output[more_num], ">");
-          if (more_pointer != NULL) {
-            *more_pointer = NULL;
-          }
-          if (less_pointer != NULL) {
-            *less_pointer = NULL;
-          }*/
-        //above two chunks causes a segfault
+        //strcpy(outstruct.output[less_num], "\n");
+        //strcpy(outstruct.output[more_num], "\n");
+
+        /*char *less_pointer = strchr(outstruct.output[less_num], "<");
+        char *more_pointer = strchr(outstruct.output[more_num], ">");
+        if (more_pointer != NULL) {
+          *more_pointer = NULL;
+        }
+        if (less_pointer != NULL) {
+          *less_pointer = NULL;
+        }*/
+        //above chunks causes a segfault
         printf("entire array:");
-        for (int counter = 0; counter < outstruct.lastToken; counter++) {
+        for (int counter = 0; counter <= outstruct.lastToken; counter++) {
           printf("%s", outstruct.output[counter]);
           printf("\n");
         }
