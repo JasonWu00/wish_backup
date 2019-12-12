@@ -62,19 +62,20 @@ int main() {
       outstruct = parse_args(input);
       outstruct.lastToken--;
 
-      //get pointers to where < and > are in the output char**
+      //get locations of < and > in the output char** array
       int less_num = -1;
       int more_num = -1;
       for (int counter = 0; counter < outstruct.lastToken; counter++) {
         if (strcmp(outstruct.output[counter], "<") == 0) {
-          printf("Found a <\n");
+          printf("Found a <\n"); 
           less_num = counter;
         }
         if (strcmp(outstruct.output[counter], ">") == 0) {
           printf("Found a >\n");
-          less_num = counter;
+          more_num = counter;
         }
       }
+      printf("DEBUG: less_num: %i, more_num: %i\n", less_num, more_num);
 
       printf("DEBUG: your cmd: %s, last_token: %i\n", commandArray[q], outstruct.lastToken);
       //printf("Command has > sign: %i, 0 if DNE\n", strchr(outstruct.output, morethan) != NULL);
@@ -91,20 +92,27 @@ int main() {
 
       else if (less_num != -1 || more_num != -1) {//has a ">" or a "<", conduct redirection
         printf("DEBUG: value of last token: %s\n", outstruct.output[outstruct.lastToken]);
-        int fd_new_input = open(outstruct.output[less_num--], O_RDWR);//to see if file exists
-        int fd_new_output = open(outstruct.output[more_num++], O_RDWR);//to see if file exists
+        int fd_new_input = -1;
+        if (less_num != -1) {
+          fd_new_input = open(outstruct.output[less_num], O_RDWR);//to see if file exists
+          printf("DEBUG: less_num: %s\n", outstruct.output[less_num]);
+        }
+        int fd_new_output = -1;
+        if (more_num != -1) {
+          fd_new_output = open(outstruct.output[more_num], O_RDWR);//to see if file exists
+          printf("DEBUG: more_num: %s\n", outstruct.output[more_num]);
+        }
         int new_fd_stdout = dup(1);
         int new_fd_stdin = dup(0);
 
-        if (fd_new_input == -1) {//if no input file exists
-          printf("DEBUG: input file DNE\n");
+        if (fd_new_input == -1 && less_num != -1) {//if no input file exists
+          printf("DEBUG: fd_new_input: %i, expect -1\n", fd_new_input);
           int fd_new_input = open(outstruct.output[less_num--], O_RDWR | O_CREAT);
         }
-        if (fd_new_output == -1) {//no output file exists
-          printf("DEBUG: output file DNE\n");
+        if (fd_new_output == -1 && more_num != -1) {//no output file exists
+          printf("DEBUG: fd_new_output: %i, expect -1\n", fd_new_output);
           int fd_new_output = open(outstruct.output[more_num++], O_RDWR | O_CREAT);
         }
-        printf("DEBUG: less_num: %i, more_num: %i\n", less_num, more_num);
         if (less_num != -1) {
           dup2(fd_new_input, 0);//replaces stdin with new input file
           printf("stdin replaced\n");
@@ -114,17 +122,33 @@ int main() {
           printf("stdout replaced\n");
         }
 
-        /*for (int counter = 0; counter < outstruct.lastToken; counter++) {
+        /*char null = "\0";
+        for (int counter = 0; counter < outstruct.lastToken; counter++) {
           if (strcmp(outstruct.output[counter], ">") == 0) {
             printf("replaced > with NULL\n");
-            outstruct.output[counter] = NULL;
+            char *p = &outstruct.output[pointer];
+            strcpy(outstruct.output[counter], &null);
           }
           if (strcmp(outstruct.output[counter], "<") == 0) {
             printf("replaced < with NULL\n");
-            outstruct.output[counter] = NULL;
+            strcpy(outstruct.output[counter], &null);
           }
         }*/
-        //above causes a segfault
+
+          /*char *less_pointer = strchr(outstruct.output[less_num], "<");
+          char *more_pointer = strchr(outstruct.output[more_num], ">");
+          if (more_pointer != NULL) {
+            *more_pointer = NULL;
+          }
+          if (less_pointer != NULL) {
+            *less_pointer = NULL;
+          }*/
+        //above two chunks causes a segfault
+        printf("entire array:");
+        for (int counter = 0; counter < outstruct.lastToken; counter++) {
+          printf("%s", outstruct.output[counter]);
+          printf("\n");
+        }
 
         run_cmds(outstruct, parentPID);
         dup2(new_fd_stdin, 0);
