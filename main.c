@@ -89,7 +89,7 @@ int main() {
         exit(0);
       }
 
-      else if (less_num != -1 || more_num != -1) {//has a ">" or a "<"
+      else if (less_num != -1 || more_num != -1) {//has a ">" or a "<", conduct redirection
         printf("DEBUG: value of last token: %s\n", outstruct.output[outstruct.lastToken]);
         int fd_new_input = open(outstruct.output[less_num--], O_RDWR);//to see if file exists
         int fd_new_output = open(outstruct.output[more_num++], O_RDWR);//to see if file exists
@@ -98,12 +98,10 @@ int main() {
 
         if (fd_new_input == -1) {//if no input file exists
           printf("DEBUG: input file DNE\n");
-          printf("DEBUG: fd input has this value: %i\n", fd_new_input);
           int fd_new_input = open(outstruct.output[less_num--], O_RDWR | O_CREAT);
         }
         if (fd_new_output == -1) {//no output file exists
           printf("DEBUG: output file DNE\n");
-          printf("DEBUG: fd output has this value: %i\n", fd_new_output);
           int fd_new_output = open(outstruct.output[more_num++], O_RDWR | O_CREAT);
         }
         printf("DEBUG: less_num: %i, more_num: %i\n", less_num, more_num);
@@ -115,6 +113,19 @@ int main() {
           dup2(fd_new_output, 1);//now with stdout
           printf("stdout replaced\n");
         }
+
+        /*for (int counter = 0; counter < outstruct.lastToken; counter++) {
+          if (strcmp(outstruct.output[counter], ">") == 0) {
+            printf("replaced > with NULL\n");
+            outstruct.output[counter] = NULL;
+          }
+          if (strcmp(outstruct.output[counter], "<") == 0) {
+            printf("replaced < with NULL\n");
+            outstruct.output[counter] = NULL;
+          }
+        }*/
+        //above causes a segfault
+
         run_cmds(outstruct, parentPID);
         dup2(new_fd_stdin, 0);
         dup2(new_fd_stdout, 1);//undoes file table manipulation
