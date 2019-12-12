@@ -3,61 +3,45 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
 #include "parse.h"
 
-char ** parse_args( char * line ) {
-  char ** output = calloc(sizeof(char *), 6);
+struct parse_output parse_args( char * line) {
+  char ** output = calloc(sizeof(char *), 20);
   //printf("test\n");
   int counter = 0;
+  struct parse_output return_struct;
 
-  while (counter <= 1) {
+  while (line != NULL) {
     output[counter] = strsep(&line, " ");
+    printf("DEBUG: counter: %i\n", counter);
     counter++;
   }
-  output[5] = NULL;
+  output[19] = NULL;
+
+  return_struct.output = output;
+  return_struct.lastToken = counter;
 
   //printf("test 2\n");
-  return output;
+  return return_struct;
 }
 
-
-
-/*
-void run_cmds(char * commandArray[100], int numCommands) {
-    char cd[3] = "cd";
-    char leave[5] = "exit";
-    const char *cd_p = &cd;
-    const char *leave_p = &leave;
-
-    for(int q = 0; q < numCommands; q++) {//for every command entered
-
-	  char * pointer = commandArray[q];
-      output = parse_args(pointer);
-
-      if (strstr(commandArray[q], cd_p) != NULL) {//input command has a "cd" in it
-        chdir(output[1]);
-        printf("\nWISH > ");
-      }
-      else if (strstr(commandArray[q], leave_p) != NULL) {//input command is "exit"
-        printf("\nWISH > Exiting shell\nThank you for visiting! Come again soon!\n\n");
-        exit(0);
-      }
-      else {
-        fork();//child process will execvp and end, parent keeps running
-        if (getpid() == parentPID) {
-          printf("\n");
-        }
-        wait(NULL);
-        if (getppid() == parentPID) {
-          //printf("WISH > ");
-          int execute_return;
-          execute_return = execvp(output[0], output);
-          if (execute_return < 0) {
-            printf("Error encountered: %i (%s)\n", errno, strerror(errno));
-          }
-          exit(0);
-        }
-      }
-}*/
+void run_cmds(struct parse_output outstruct, int parentPID) {
+  fork();//child process will execvp and end, parent keeps running
+  if (getpid() == parentPID) {
+    printf("\n");
+  }
+  wait(NULL);
+  if (getppid() == parentPID) {
+    //printf("WISH > ");
+    int execute_return;
+    execute_return = execvp(outstruct.output[0], outstruct.output);
+    if (execute_return < 0) {
+      printf("Error encountered: %i (%s)\n", errno, strerror(errno));
+    }
+    exit(0);
+  }
+}

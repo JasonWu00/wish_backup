@@ -46,37 +46,59 @@ int main() {
 
     char cd[3] = "cd";
     char leave[5] = "exit";
+    char lessthan = "<";
+    char morethan = ">";
+
     const char *cd_p = &cd;
     const char *leave_p = &leave;
-
+    const char *less_p = &lessthan;
+    const char *more_p = &morethan;
     for(int q = 0; q < numCommands; q++) {//for every command entered
 
-	  char * pointer = commandArray[q];
-      output = parse_args(pointer);
+	    char * pointer = commandArray[q];
+      char backup[100];
+      strcpy(backup, commandArray);
+      struct parse_output outstruct;
+      outstruct = parse_args(input);
+      outstruct.lastToken--;
+      //int has_greater = strchr(outstruct.output[outstruct.lastToken-1], ">");//has a ">"
+      //int has_lessthan = strchr(outstruct.output[outstruct.lastToken-1], "<");//has a "<"
 
+      printf("DEBUG: your cmd: %s, last_token: %i\n", commandArray[q], outstruct.lastToken);
+      //printf("Command has > sign: %i, 0 if DNE\n", strchr(outstruct.output, morethan) != NULL);
+      //printf("DEBUG: %s\n", backup[q]);
+      //commented out printf that caused segfault
       if (strstr(commandArray[q], cd_p) != NULL) {//input command has a "cd" in it
-        chdir(output[1]);
+        chdir(outstruct.output[1]);
         printf("\nWISH > ");
       }
       else if (strstr(commandArray[q], leave_p) != NULL) {//input command is "exit"
         printf("\nWISH > Exiting shell\nThank you for visiting! Come again soon!\n\n");
         exit(0);
       }
-      else {
-        fork();//child process will execvp and end, parent keeps running
-        if (getpid() == parentPID) {
-          printf("\n");
-        }
-        wait(NULL);
-        if (getppid() == parentPID) {
-          //printf("WISH > ");
-          int execute_return;
-          execute_return = execvp(output[0], output);
-          if (execute_return < 0) {
-            printf("Error encountered: %i (%s)\n", errno, strerror(errno));
-          }
+      else if (strchr(commandArray[q], morethan) != NULL) {//has a ">" or a "<"
+        printf("DEBUG: value of last token: %s\n", outstruct.output[outstruct.lastToken]);
+        int fd_redirectedFile = open(outstruct.output[outstruct.lastToken], O_RDWR);//to see if file exists
+        int new_fd_stdout = dup(1);
+        int new_fd_stding = dup(0);
+
+        if (fd_redirectedFile == -1) {//if no such file
+          printf("DEBUG: file DNE\n");
+          printf("DEBUG: fd_redir has this value: %i\n", fd_redirectedFile);
+          //create a file
+          fd_redirectedFile = open(outstruct.output[outstruct.lastToken], O_RDWR | O_CREAT);
+          //redirection below
+          //dup2()
           exit(0);
         }
+        else {//file exists, proceed with redirection
+          printf("DEBUG: file exists\n");
+          printf("DEBUG: fd_redir has this value: %i\n", fd_redirectedFile);
+          exit(0);
+        }
+      }
+      else {
+        run_cmds(outstruct, parentPID);
       }
     }
     printf("\nWISH > ");
