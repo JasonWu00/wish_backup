@@ -4,6 +4,7 @@
 
 * Running singular commands (including cd and exit)
 * Running multiple commands separated by one or more semicolons
+* Simple redirection using > and <
 
 ### Features unsuccessfully implemented
 
