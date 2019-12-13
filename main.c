@@ -91,6 +91,10 @@ int main() {
       else if (less_num != -1 || more_num != -1) {//has a ">" or a "<", conduct redirection
         printf("DEBUG: value of last token: %s\n", outstruct.output[outstruct.lastToken]);
         int fd_new_input = -1;
+
+        //strncat(outstruct.output[less_num], ".txt", 4);
+        //strncat(outstruct.output[more_num], ".txt", 4);
+
         if (less_num != -1) {
           fd_new_input = open(outstruct.output[less_num], O_RDWR);//to see if file exists
           printf("DEBUG: less_num: %s\n", outstruct.output[less_num]);
@@ -122,43 +126,12 @@ int main() {
           printf("stdout replaced\n");
         }
 
-        //const char null = "\0";
-        /*char *p = outstruct.output;
-        for (int counter = 0; counter < outstruct.lastToken; counter++) {
-          p += sizeof (char *);
-          if (strcmp(outstruct.output[counter], ">") == 0) {
-            printf("replaced > with NULL\n");
-            *p = "\0";
-          }
-          if (strcmp(outstruct.output[counter], "<") == 0) {
-            printf("replaced < with NULL\n");
-            *p = "\0";
-          }
-        }*/
+        //The lines below are to prevent execvp from reading the < and/or >.
 
-        char *pos;
-        if ((pos = strchr(input, '>')) != NULL) {
-          printf("replaced > with NULL\n");
-          *pos = '\0';
-        }
-        if ((pos = strchr(input, '<')) != NULL) {
-          printf("replaced < with NULL\n");
-          *pos = '\0';
-        }
+        outstruct.output[less_num] = NULL;
+        outstruct.output[more_num] = NULL;
 
-        //strcpy(outstruct.output[less_num - 1], "\n");
-        //strcpy(outstruct.output[more_num - 1], "\n");
-
-        /*char *less_pointer = strchr(outstruct.output[less_num], "<");
-        char *more_pointer = strchr(outstruct.output[more_num], ">");
-        if (more_pointer != NULL) {
-          *more_pointer = NULL;
-        }
-        if (less_pointer != NULL) {
-          *less_pointer = NULL;
-        }*/
-        //above chunks causes a segfault
-        printf("entire array:");
+        printf("entire array:\n");
         for (int counter = 0; counter <= outstruct.lastToken; counter++) {
           printf("%s", outstruct.output[counter]);
           printf("\n");
