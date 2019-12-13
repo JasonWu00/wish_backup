@@ -65,7 +65,7 @@ int main() {
       int more_num = -1;
       for (int counter = 0; counter < outstruct.lastToken; counter++) {
         if (strcmp(outstruct.output[counter], "<") == 0) {
-          printf("Found a <\n"); 
+          printf("Found a <\n");
           less_num = counter;
         }
         if (strcmp(outstruct.output[counter], ">") == 0) {
@@ -105,11 +105,13 @@ int main() {
 
         if (fd_new_input == -1 && less_num != -1) {//if no input file exists
           printf("DEBUG: fd_new_input: %i, expect -1\n", fd_new_input);
-          int fd_new_input = open(outstruct.output[less_num--], O_RDWR | O_CREAT);
+          printf("Token at output: %s\n", outstruct.output[less_num - 1]);
+          int fd_new_input = open(outstruct.output[less_num - 1], O_RDWR | O_CREAT);
         }
         if (fd_new_output == -1 && more_num != -1) {//no output file exists
           printf("DEBUG: fd_new_output: %i, expect -1\n", fd_new_output);
-          int fd_new_output = open(outstruct.output[more_num++], O_RDWR | O_CREAT);
+          printf("Token at output: %s\n", outstruct.output[more_num + 1]);
+          int fd_new_output = open(outstruct.output[more_num + 1], O_RDWR | O_CREAT);
         }
         if (less_num != -1) {
           dup2(fd_new_input, 0);//replaces stdin with new input file
@@ -134,8 +136,18 @@ int main() {
           }
         }*/
 
-        //strcpy(outstruct.output[less_num], "\n");
-        //strcpy(outstruct.output[more_num], "\n");
+        char *pos;
+        if ((pos = strchr(input, '>')) != NULL) {
+          printf("replaced > with NULL\n");
+          *pos = '\0';
+        }
+        if ((pos = strchr(input, '<')) != NULL) {
+          printf("replaced < with NULL\n");
+          *pos = '\0';
+        }
+
+        //strcpy(outstruct.output[less_num - 1], "\n");
+        //strcpy(outstruct.output[more_num - 1], "\n");
 
         /*char *less_pointer = strchr(outstruct.output[less_num], "<");
         char *more_pointer = strchr(outstruct.output[more_num], ">");
