@@ -10,6 +10,8 @@
 #include "parse.h"
 
 int main() {
+  umask(0);
+
   printf("Opening shell.\n");
   printf("This shell can only take in up to 6 tokens in a single line.\n");
   printf("If you enter a nonexistent command, the shell will not execute it.\n");
@@ -96,27 +98,29 @@ int main() {
         //strncat(outstruct.output[more_num], ".txt", 4);
 
         if (less_num != -1) {
-          fd_new_input = open(outstruct.output[less_num], O_RDWR);//to see if file exists
+          int fd_new_input = open(outstruct.output[less_num - 1], O_RDWR | O_CREAT | O_TRUNC, 0666);
           printf("DEBUG: less_num: %s\n", outstruct.output[less_num]);
+          printf("DEBUG: opening %s file\n", outstruct.output[less_num - 1]);
         }
         int fd_new_output = -1;
         if (more_num != -1) {
-          fd_new_output = open(outstruct.output[more_num], O_RDWR);//to see if file exists
+          int fd_new_output = open(outstruct.output[more_num + 1], O_RDWR | O_CREAT | O_TRUNC, 0666);
           printf("DEBUG: more_num: %s\n", outstruct.output[more_num]);
+          printf("DEBUG: opening %s file\n", outstruct.output[more_num + 1]);
         }
         int new_fd_stdout = dup(1);
         int new_fd_stdin = dup(0);
 
-        if (fd_new_input == -1 && less_num != -1) {//if no input file exists
-          printf("DEBUG: fd_new_input: %i, expect -1\n", fd_new_input);
+        /*if (fd_new_input == -1 && less_num != -1) {//if no input file exists
           printf("Token at output: %s\n", outstruct.output[less_num - 1]);
-          int fd_new_input = open(outstruct.output[less_num - 1], O_RDWR | O_CREAT);
+          int fd_new_input = open(outstruct.output[less_num - 1], O_RDWR | O_CREAT, 0666);
+          printf("DEBUG: fd_new_input: %i\n", fd_new_input);
         }
         if (fd_new_output == -1 && more_num != -1) {//no output file exists
-          printf("DEBUG: fd_new_output: %i, expect -1\n", fd_new_output);
           printf("Token at output: %s\n", outstruct.output[more_num + 1]);
-          int fd_new_output = open(outstruct.output[more_num + 1], O_RDWR | O_CREAT);
-        }
+          int fd_new_output = open(outstruct.output[more_num + 1], O_RDWR | O_CREAT, 0666);
+          printf("DEBUG: fd_new_output: %i\n", fd_new_output);
+        }*/
         if (less_num != -1) {
           dup2(fd_new_input, 0);//replaces stdin with new input file
           printf("stdin replaced\n");
@@ -125,6 +129,7 @@ int main() {
           dup2(fd_new_output, 1);//now with stdout
           printf("stdout replaced\n");
         }
+
 
         //The lines below are to prevent execvp from reading the < and/or >.
 
