@@ -57,9 +57,9 @@ int main() {
     const char *more_p = &morethan;
     for(int q = 0; q < numCommands; q++) {//for every command entered
 
-	  char * pointer = commandArray[q];
+	    char * pointer = commandArray[q];
       struct parse_output outstruct;
-      outstruct = parse_args(input);
+      outstruct = parse_args(pointer);
       outstruct.lastToken--;
 
       //get locations of < and > in the output char** array
@@ -75,9 +75,9 @@ int main() {
           more_num = counter;
         }
       }
-      printf("DEBUG: less_num: %i, more_num: %i\n", less_num, more_num);
+      //printf("DEBUG: less_num: %i, more_num: %i\n", less_num, more_num);
 
-      printf("DEBUG: your cmd: %s, last_token: %i\n", commandArray[q], outstruct.lastToken);
+      //printf("DEBUG: your cmd: %s, last_token: %i\n", commandArray[q], outstruct.lastToken);
       //printf("Command has > sign: %i, 0 if DNE\n", strchr(outstruct.output, morethan) != NULL);
       //commented out printf that caused segfault
       if (strstr(commandArray[q], cd_p) != NULL) {//input command has a "cd" in it
@@ -92,22 +92,23 @@ int main() {
 
       else if (less_num != -1 || more_num != -1) {//has a ">" or a "<", conduct redirection
         printf("DEBUG: value of last token: %s\n", outstruct.output[outstruct.lastToken]);
-        int fd_new_input = -1;
 
         //strncat(outstruct.output[less_num], ".txt", 4);
         //strncat(outstruct.output[more_num], ".txt", 4);
+        int fd_new_input = -1;
+        int fd_new_output = -1;
 
         if (less_num != -1) {
-          int fd_new_input = open(outstruct.output[less_num - 1], O_RDWR | O_CREAT | O_TRUNC, 0666);
+          fd_new_input = open(outstruct.output[less_num - 1], O_RDWR | O_CREAT | O_TRUNC, 0666);
           printf("DEBUG: less_num: %s\n", outstruct.output[less_num]);
           printf("DEBUG: opening %s file\n", outstruct.output[less_num - 1]);
         }
-        int fd_new_output = -1;
         if (more_num != -1) {
-          int fd_new_output = open(outstruct.output[more_num + 1], O_RDWR | O_CREAT | O_TRUNC, 0666);
+          fd_new_output = open(outstruct.output[more_num + 1], O_RDWR | O_CREAT | O_TRUNC, 0666);
           printf("DEBUG: more_num: %s\n", outstruct.output[more_num]);
           printf("DEBUG: opening %s file\n", outstruct.output[more_num + 1]);
         }
+
         int new_fd_stdout = dup(1);
         int new_fd_stdin = dup(0);
 
